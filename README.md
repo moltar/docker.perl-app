@@ -20,9 +20,17 @@ If your project uses [Carton](https://metacpan.org/pod/Carton), it will be detec
 
 If your project does not use Carton, the build script will simply try to install dependencies via `cpanm --installdeps .` command into the Perl's module directory, rather than `local::lib`.
 
-### ./build ###
+### Build Hooks ###
 
-As the last, optional step, if you have an executable named `build` in your project root, it will be called. This can be used to add custom steps to finalize the build (e.g. static asset builds, cleanup, sanity checks).
+Additionally, there are build hooks defined that you can use. If the build script finds these executables in your project root, they will be called.
+
+#### ./before_build ####
+
+As the name suggest, this is called before the build of your project. However, for convenience, it is actually called after Perl is installed. Which means this script can be a regular Perl script if you wish, or Bash, or any other. This hook is useful for installing system pre-reqs for building Perl modules.
+
+#### ./after_build ####
+
+This, of course, is called after the build. It can be used to do general clean up, asset building, etc.
 
 ## Usage ##
 

@@ -1,5 +1,10 @@
 #!/usr/bin/env sh
 
+## create app user and group
+groupadd -r $APP_USER -g 200 && \
+useradd -u 200 -r -g $APP_USER -d $APP_DIR -s /sbin/nologin -c "$APP_USER user" $APP_USER && \
+chown -R $APP_USER:$APP_USER $APP_DIR
+
 PERL_VERSION_FILE=$APP_DIR/.perl-version
 ENTRYPOINT=""
 
@@ -14,6 +19,12 @@ fi
 ## install Perl via plenv
 ## $PLENV_INSTALL variable is inherited from moltar/plenv image
 $PLENV_INSTALL $PLENV_VERSION
+
+## before_build hook
+if [ -x $APP_DIR/before_build ]; then
+    echo "Running $APP_DIR/before_build"
+    cd $APP_DIR && ./before_build
+fi
 
 ## if we have a Carton environment, then build using that
 if [ -f $APP_DIR/cpanfile.snapshot ]; then
@@ -42,19 +53,14 @@ else
     ENTRYPOINT="plenv exec"
 fi
 
-## clean up
-rm -rf .git local/cache local/man /root/.cpanm/
+if [ -x $APP_DIR/after_build ]; then
+    echo "Running $APP_DIR/after_build"
+    cd $APP_DIR && ./after_build
+fi
 
-## create app user and group
-groupadd -r $APP_USER -g 200 && \
-useradd -u 200 -r -g $APP_USER -d $APP_DIR -s /sbin/nologin -c "$APP_USER user" $APP_USER && \
-chown -R $APP_USER:$APP_USER $APP_DIR
+## clean up
+cd $APP_DIR && rm -rf .git local/cache local/man /root/.cpanm/
 
 ## create entrypoint script
 echo "#!/usr/bin/env sh\nexec /sbin/my_init -- /sbin/setuser $APP_USER $ENTRYPOINT \"\$@\"" > /entrypoint.sh && \
 chmod 755 /entrypoint.sh
-
-if [ -x $APP_DIR/build ]; then
-    echo "Running $APP_DIR/build"
-    $APP_DIR/build
-fi
