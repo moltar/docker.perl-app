@@ -2,20 +2,20 @@
 
 TMPDIR=$(mktemp -d)
 
+echo -e "--- building moltar/perl-app"
 docker build --no-cache=true -t moltar/perl-app:$BUILDBOX_BUILD_NUMBER .
-
 buildbox-exit-if-failed $?
 
+echo -e "--- building moltar/perl-app-example"
 cd $TMPDIR && \
 git clone git@github.com:moltar/docker.perl-app.example.git && \
 cd docker.perl-app.example && \
 docker build --no-cache=true -t moltar/perl-app-example:$BUILDBOX_BUILD_NUMBER
-
 buildbox-exit-if-failed $?
 
+echo -e "--- running moltar/perl-app-example"
 CID=$(docker run -d -p 5000:5000 moltar/perl-app-example:$BUILDBOX_BUILD_NUMBER)
 CIP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${CID})
-
 buildbox-exit-if-failed $?
 
 sleep 3
