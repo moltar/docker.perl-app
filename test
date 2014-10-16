@@ -26,7 +26,7 @@ CID=$(docker run -d -p $PORT moltar/perl-app-example:$BUILDBOX_BUILD_NUMBER)
 CIP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' $CID)
 exit-if-failed $?
 
-sleep 1
+sleep 5
 curl --retry 10 --retry-delay 5 -L -I http://$CIP:$PORT | head -n1 | grep "200 OK"
 exit-if-failed $?
 
