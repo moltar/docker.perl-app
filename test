@@ -10,7 +10,7 @@ echo -e "--- building moltar/perl-app-example"
 cd $TMPDIR && \
 git clone git@github.com:moltar/docker.perl-app.example.git && \
 cd docker.perl-app.example && \
-docker build --no-cache=true -t moltar/perl-app-example:$BUILDBOX_BUILD_NUMBER
+docker build --no-cache=true -t moltar/perl-app-example:$BUILDBOX_BUILD_NUMBER .
 buildbox-exit-if-failed $?
 
 echo -e "--- running moltar/perl-app-example"
