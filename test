@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 TMPDIR=$(mktemp -d)
+PORT=5000
 
 function exit-if-failed {
   if [ $1 -ne 0 ]
@@ -21,11 +22,17 @@ docker build --no-cache=true -t moltar/perl-app-example:$BUILDBOX_BUILD_NUMBER .
 exit-if-failed $?
 
 echo -e "--- running moltar/perl-app-example"
-CID=$(docker run -d -p 5000:5000 moltar/perl-app-example:$BUILDBOX_BUILD_NUMBER)
-CIP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${CID})
+CID=$(docker run -d -p $PORT:$PORT moltar/perl-app-example:$BUILDBOX_BUILD_NUMBER)
+CIP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' $CID)
 exit-if-failed $?
 
 sleep 3
-curl --fail --silent --show-error --retry 10 --retry-delay 3 -L -I http://${CIP}:5000 | head -n1 | grep "200 OK"
-
+curl --fail --silent --show-error --retry 10 --retry-delay 3 -L -I http://$CIP:$PORT | head -n1 | grep "200 OK"
 exit-if-failed $?
+
+## cleanup
+docker kill $CID
+sleep 2
+docker rm $CID
+docker rmi moltar/perl-app-example:$BUILDBOX_BUILD_NUMBER
+docker rmi moltar/perl-app:latest
