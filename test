@@ -2,8 +2,15 @@
 
 TMPDIR=$(mktemp -d)
 
+## cleanup
+docker stop $(docker ps -a -q)
+docker rm $(docker ps -a -q)
+docker stop $(docker ps -a -q)
+docker rm $(docker ps -a -q)
+docker rmi $(docker images -a -q)
+
 echo -e "--- building moltar/perl-app"
-docker build --no-cache=true -t moltar/perl-app:$BUILDBOX_BUILD_NUMBER .
+docker build --no-cache=true -t moltar/perl-app:latest .
 buildbox-exit-if-failed $?
 
 echo -e "--- building moltar/perl-app-example"
