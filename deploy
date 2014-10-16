@@ -1,1 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
+
+## trigger automated build
+curl --data "build=true" -X POST https://registry.hub.docker.com/u/moltar/perl-app/trigger/$TRIGGER_TOKEN/
