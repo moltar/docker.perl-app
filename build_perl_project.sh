@@ -31,7 +31,7 @@ if [ -f $APP_DIR/cpanfile.snapshot ]; then
     ## remove already installed modules from local/ dir
     ## if it appears to be managed by carton
     if [ -d $APP_DIR/local/lib/perl5 ]; then
-        rm -rf local
+        rm -rf $APP_DIR/local
     fi
 
     ## if we have carton vendor cache, then use that
@@ -39,11 +39,13 @@ if [ -f $APP_DIR/cpanfile.snapshot ]; then
     if [ -d $APP_DIR/vendor/cache ]; then
         vendor/bin/carton install --deployment --cached
         ENTRYPOINT="vendor/bin/carton exec"
+        rm -rf $APP_DIR/vendor/cache;
     else
         plenv exec cpanm --notest --quiet Carton && \
         plenv rehash && \
         plenv exec carton install --deployment
         ENTRYPOINT="plenv exec carton exec"
+        rm -rf $APP_DIR/local/cache $APP_DIR/local/man
     fi
 ## otherwise try installing deps with cpanm, but do not fail in case
 ## there are no deps defined (e.g. not Makefile.PL, cpanfile or any other)
@@ -59,7 +61,7 @@ if [ -x $APP_DIR/after_build ]; then
 fi
 
 ## clean up
-cd $APP_DIR && rm -rf .git local/cache local/man /root/.cpanm/
+cd $APP_DIR && rm -rf .git /root/.cpanm/
 
 ## create entrypoint script
 echo "#!/usr/bin/env sh\nexec /sbin/my_init -- /sbin/setuser $APP_USER $ENTRYPOINT \"\$@\"" > /entrypoint.sh && \
